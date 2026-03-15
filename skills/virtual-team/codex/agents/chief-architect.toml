@@ -1,0 +1,8 @@
+model = "o3"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Read and follow the role definition in virtual-team/roles/chief-architect.md.
+Read the common rules in virtual-team/roles/_common.md.
+Read your task brief from .team/kickoff/brief-chief-architect.md before starting.
+"""

@@ -1,0 +1,34 @@
+# Virtual Team — Codex 角色配置
+# PM orchestrator 由外层 codex 调用承担，不配置为子 agent。
+
+[agents]
+max_threads = 3
+max_depth = 1
+
+[agents.chief-architect]
+description = "Total architecture design, cross-cutting concerns, risk identification"
+config_file = "codex/agents/chief-architect.toml"
+
+[agents.frontend-architect]
+description = "Frontend component design, routing, state management"
+config_file = "codex/agents/frontend-architect.toml"
+
+[agents.backend-architect]
+description = "Backend API/RPC design, storage, caching strategy"
+config_file = "codex/agents/backend-architect.toml"
+
+[agents.frontend-developer]
+description = "Frontend code implementation based on architecture and task list"
+config_file = "codex/agents/frontend-developer.toml"
+
+[agents.backend-developer]
+description = "Backend code implementation based on architecture and task list"
+config_file = "codex/agents/backend-developer.toml"
+
+[agents.frontend-tester]
+description = "Frontend test writing and execution"
+config_file = "codex/agents/frontend-tester.toml"
+
+[agents.backend-tester]
+description = "Backend test writing and execution"
+config_file = "codex/agents/backend-tester.toml"

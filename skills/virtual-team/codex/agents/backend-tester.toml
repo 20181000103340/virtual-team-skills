@@ -1,0 +1,8 @@
+model = "o3"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Read and follow the role definition in virtual-team/roles/backend-tester.md.
+Read the common rules in virtual-team/roles/_common.md.
+Read your task brief from .team/kickoff/brief-backend-tester.md before starting.
+"""
