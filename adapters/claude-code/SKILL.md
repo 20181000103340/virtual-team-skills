@@ -33,14 +33,23 @@ Parse `$ARGUMENTS`:
 ## Skill Directory
 
 Your skill files are at: `${CLAUDE_SKILL_DIR}`
-- Role prompts: `${CLAUDE_SKILL_DIR}/roles/*.md`
-- Protocols: `${CLAUDE_SKILL_DIR}/protocols/*.md`
-- Templates: `${CLAUDE_SKILL_DIR}/templates/*.md`
+- Core shared files: `${CLAUDE_SKILL_DIR}/core/`
+- Role prompts: `${CLAUDE_SKILL_DIR}/core/roles/*.md`
+- Protocols: `${CLAUDE_SKILL_DIR}/core/protocols/*.md`
+- Templates: `${CLAUDE_SKILL_DIR}/core/templates/*.md`
 
 ## Security Rules
 
 1. Only execute commands listed in the requirement document (build/test/lint fields)
-2. Commands must match allowlist prefixes: `npm run`, `npx`, `pnpm`, `yarn`, `make`, `node`, `tsx`
+2. Commands must match language-appropriate allowlist prefixes:
+   - **JS/TS**: `npm run`, `npx`, `pnpm`, `yarn`, `bun`, `make`, `node`, `tsx`
+   - **Python**: `pytest`, `python`, `pip`, `poetry`, `pdm`, `ruff`, `mypy`, `black`, `isort`, `make`
+   - **Go**: `go`, `make`, `golangci-lint`
+   - **Rust**: `cargo`, `make`, `rustfmt`, `clippy`
+   - **Java/Kotlin**: `mvn`, `gradle`, `gradlew`, `make`, `java`
+   - **Ruby**: `bundle`, `rake`, `ruby`, `make`
+   - **C#/.NET**: `dotnet`, `make`, `nuget`
+   - **General**: `make`, `docker compose`
 3. Command timeout: 300 seconds
 4. Working directory: project path from requirement document
 5. Never: git commit, git push, delete files, modify CI, modify lock files (unless explicitly authorized + interactive confirmation)
@@ -59,7 +68,7 @@ Your skill files are at: `${CLAUDE_SKILL_DIR}`
 9. **Gate 0**: all validations pass
 
 ### Phase 1: Project Kickoff
-1. Read `${CLAUDE_SKILL_DIR}/protocols/kickoff-protocol.md`
+1. Read `${CLAUDE_SKILL_DIR}/core/protocols/kickoff-protocol.md`
 2. Generate `.team/kickoff/assignment.md` (task assignment table)
 3. Generate `.team/kickoff/gates.md` (Gate definitions)
 4. Generate 7 role briefs: `.team/kickoff/brief-{role}.md`
@@ -69,7 +78,7 @@ Your skill files are at: `${CLAUDE_SKILL_DIR}`
 6. If `--interactive`: AskUserQuestion to confirm assignment table
 
 ### Phase 2: Architecture Design
-Read `${CLAUDE_SKILL_DIR}/protocols/architecture-protocol.md`
+Read `${CLAUDE_SKILL_DIR}/core/protocols/architecture-protocol.md`
 
 **Step 2a** (sequential): Launch chief-architect Agent
 - Prompt includes: `roles/_common.md` + `roles/chief-architect.md` + brief + requirement doc path
@@ -82,7 +91,7 @@ Read `${CLAUDE_SKILL_DIR}/protocols/architecture-protocol.md`
 **Gate 2**: all 3 arch docs exist + interface names cross-check
 
 ### Phase 3: Architecture Review
-Read `${CLAUDE_SKILL_DIR}/protocols/architecture-review-protocol.md`
+Read `${CLAUDE_SKILL_DIR}/core/protocols/architecture-review-protocol.md`
 
 Launch 3 review Agents in parallel (concurrency=3):
 - frontend-architect reviews backend proposal
@@ -101,7 +110,7 @@ If blockers > 0: directed fix (re-run only the affected Phase 2 agent with block
 If `--interactive`: AskUserQuestion to confirm review results.
 
 ### Phase 4: Task Breakdown
-Read `${CLAUDE_SKILL_DIR}/protocols/task-breakdown-protocol.md`
+Read `${CLAUDE_SKILL_DIR}/core/protocols/task-breakdown-protocol.md`
 
 PM generates:
 - `.team/tasks/frontend.md` (frontend task list)
@@ -113,7 +122,7 @@ Verify: no file path overlap between frontend/backend tasks. Task count >= accep
 **Gate 4**: all 3 task files exist + no overlap + coverage check
 
 ### Phase 5: Implementation
-Read `${CLAUDE_SKILL_DIR}/protocols/implementation-protocol.md`
+Read `${CLAUDE_SKILL_DIR}/core/protocols/implementation-protocol.md`
 
 Launch 2 Agents in parallel (concurrency=2):
 - frontend-developer: reads brief + arch + tasks + contract → writes code + `.team/impl/frontend.md`
@@ -122,7 +131,7 @@ Launch 2 Agents in parallel (concurrency=2):
 **Gate 5**: all tasks [x] + build pass + lint pass (execute commands, timeout 300s)
 
 ### Phase 6: Testing
-Read `${CLAUDE_SKILL_DIR}/protocols/testing-protocol.md`
+Read `${CLAUDE_SKILL_DIR}/core/protocols/testing-protocol.md`
 
 Launch 2 Agents in parallel (concurrency=2):
 - frontend-tester: writes tests → executes tests (real Bash) → `.team/test/frontend.md`
@@ -134,7 +143,7 @@ If Gate 6 fails: directed fix loop (defects → dev agent fix → re-test, max 3
 If max retries exceeded: write `.team/blocked-report.md` and stop.
 
 ### Phase 7: Project Review
-Read `${CLAUDE_SKILL_DIR}/protocols/project-review-protocol.md`
+Read `${CLAUDE_SKILL_DIR}/core/protocols/project-review-protocol.md`
 
 Launch 3 review Agents in parallel (concurrency=3):
 - chief-architect: code-architecture consistency
@@ -147,7 +156,7 @@ If `--interactive`: AskUserQuestion to confirm.
 **Gate 7**: blocker count = 0
 
 ### Phase 8: Delivery
-Read `${CLAUDE_SKILL_DIR}/protocols/delivery-protocol.md`
+Read `${CLAUDE_SKILL_DIR}/core/protocols/delivery-protocol.md`
 
 Generate `.team/final-report.md`. No auto-commit unless explicitly authorized.
 
