@@ -4,8 +4,27 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CORE_DIR="${SCRIPT_DIR}/core"
 
+# --- Detect installation mode ---
+# --copy: force copy mode (for containers or when symlinks won't work)
+# --link: force symlink mode (default for physical machines)
+INSTALL_MODE="link"
+for arg in "$@"; do
+  case "$arg" in
+    --copy) INSTALL_MODE="copy" ;;
+    --link) INSTALL_MODE="link" ;;
+  esac
+done
+# Strip flags from args
+ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --copy|--link) ;;
+    *) ARGS+=("$arg") ;;
+  esac
+done
+
 usage() {
-  echo "Usage: ./install.sh <platform>"
+  echo "Usage: ./install.sh <platform> [--copy|--link]"
   echo ""
   echo "Platforms:"
   echo "  claude-code   Install skills to ~/.claude/skills/"
@@ -13,7 +32,14 @@ usage() {
   echo "  codex         Show Codex CLI setup instructions"
   echo "  all           Install for all platforms"
   echo ""
-  echo "Example: ./install.sh claude-code"
+  echo "Options:"
+  echo "  --link        Use symlinks for core/ (default, for physical machines)"
+  echo "  --copy        Copy core/ files (for Docker containers or remote installs)"
+  echo ""
+  echo "Examples:"
+  echo "  ./install.sh claude-code          # Physical machine, symlink"
+  echo "  ./install.sh openclaw --copy      # Docker container, copy files"
+  echo "  ./install.sh all                  # All platforms, symlink"
 }
 
 install_skill_dir() {
@@ -28,12 +54,18 @@ install_skill_dir() {
     rm -rf "$target_dir"
   fi
 
-  # Create skill directory with SKILL.md + core symlink
+  # Create skill directory with SKILL.md
   mkdir -p "$target_dir"
   cp "$adapter_dir/SKILL.md" "$target_dir/SKILL.md"
-  ln -sf "$CORE_DIR" "$target_dir/core"
 
-  echo "  ✓ ${skill_name} -> ${target_dir}"
+  # Install core: symlink or copy
+  if [ "$INSTALL_MODE" = "copy" ]; then
+    cp -r "$CORE_DIR" "$target_dir/core"
+    echo "  ✓ ${skill_name} -> ${target_dir} (copied)"
+  else
+    ln -sf "$CORE_DIR" "$target_dir/core"
+    echo "  ✓ ${skill_name} -> ${target_dir} (symlinked)"
+  fi
 }
 
 install_claude_code() {
@@ -82,12 +114,12 @@ install_codex() {
 
 # --- Main ---
 
-if [ $# -eq 0 ]; then
+if [ ${#ARGS[@]} -eq 0 ]; then
   usage
   exit 1
 fi
 
-PLATFORM="$1"
+PLATFORM="${ARGS[0]}"
 
 case "$PLATFORM" in
   claude-code)
